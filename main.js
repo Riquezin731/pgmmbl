@@ -1,33 +1,46 @@
-import * as THREE from 'https://unpkg.com/three@0.128.0/build/three.module.js';
-import { PointerLockControls } from 'https://unpkg.com/three@0.128.0/examples/jsm/controls/PointerLockControls.js';
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.js';
+import { PointerLockControls }
+  from 'https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/controls/PointerLockControls.js';
 import { Bot } from './bot.js';
 import { Minimap } from './minimap.js';
 
-// Setup básico
+// Cena, câmera e renderizador
 const scene    = new THREE.Scene();
 const camera   = new THREE.PerspectiveCamera(75, innerWidth/innerHeight, 0.1, 1000);
+camera.position.set(0, 2, 5);
+
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(innerWidth, innerHeight);
 document.body.appendChild(renderer.domElement);
 
-// Luz
-const light = new THREE.DirectionalLight(0xffffff, 1);
-light.position.set(5, 10, 7.5);
-scene.add(light);
+// Ajuste ao redimensionar
+window.addEventListener('resize', () => {
+  camera.aspect = innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
 
-// Chão
+// Luzes
+scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+dirLight.position.set(5, 10, 5);
+scene.add(dirLight);
+
+// Solo
 const groundGeo = new THREE.PlaneGeometry(100, 100);
 const groundMat = new THREE.MeshStandardMaterial({ color: 0x555555 });
 const ground    = new THREE.Mesh(groundGeo, groundMat);
 ground.rotation.x = -Math.PI / 2;
 scene.add(ground);
 
-// Controles de mira e movimento
+// Controles de primeira pessoa
 const controls = new PointerLockControls(camera, renderer.domElement);
-scene.add(controls.getObject());
-document.addEventListener('click', () => controls.lock(), false);
+const instructions = document.getElementById('instructions');
+instructions.addEventListener('click', () => controls.lock());
+controls.addEventListener('lock',   () => instructions.style.display = 'none');
+controls.addEventListener('unlock', () => instructions.style.display = '');
 
-// Bots
+// Cria bots
 const bots = [];
 for (let i = 0; i < 5; i++) {
   const x = (Math.random() - 0.5) * 50;
@@ -36,17 +49,15 @@ for (let i = 0; i < 5; i++) {
 }
 
 // Minimap
-const minimap = new Minimap(scene, bots);
+const minimap = new Minimap(scene);
 
 // Raycaster para tiro
 const raycaster = new THREE.Raycaster();
-const mouseDir  = new THREE.Vector2();
 
-// Container de dano na tela
+// Container de dano
 const damageContainer = document.getElementById('damageContainer');
 
 function showDamage(point3D, amount) {
-  // Converte para coordenadas de tela
   const vector = point3D.clone().project(camera);
   const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
   const y = (-vector.y * 0.5 + 0.5) * window.innerHeight;
@@ -58,17 +69,20 @@ function showDamage(point3D, amount) {
   span.textContent = amount;
   damageContainer.appendChild(span);
 
-  // Remove após a animação
   setTimeout(() => damageContainer.removeChild(span), 1000);
 }
 
-// Disparo ao clicar com botão direito
-window.addEventListener('mousedown', e => {
-  if (e.button !== 2) return; // apenas clique direito
-  raycaster.setFromCamera(mouseDir, camera);
+// Disparo ao clicar (botão esquerdo) com cursor travado
+window.addEventListener('click', () => {
+  if (!controls.isLocked) return;
 
-  const meshes = bots.map(b => b.mesh);
-  const hits = raycaster.intersectObjects(meshes);
+  // Origem e direção
+  const origin    = camera.position.clone();
+  const direction = new THREE.Vector3();
+  camera.getWorldDirection(direction);
+  raycaster.set(origin, direction);
+
+  const hits = raycaster.intersectObjects(bots.map(b => b.mesh));
   if (hits.length > 0) {
     const hit = hits[0];
     const bot = bots.find(b => b.mesh === hit.object);
@@ -76,26 +90,20 @@ window.addEventListener('mousedown', e => {
       const dmg = Math.floor(Math.random() * 20) + 5;
       bot.health -= dmg;
       showDamage(hit.point, dmg);
-      if (bot.health <= 0) {
-        scene.remove(bot.mesh);
-      }
+      if (bot.health <= 0) scene.remove(bot.mesh);
     }
   }
 });
 
-// Gameplay loop
+// Loop de jogo
 let lastTime = performance.now();
 function animate(time) {
   const delta = (time - lastTime) / 1000;
   lastTime = time;
 
-  // Atualiza bots
   bots.forEach(b => b.update(delta));
 
-  // Render principal
   renderer.render(scene, camera);
-
-  // Render do minimapa
   minimap.render();
 
   requestAnimationFrame(animate);
