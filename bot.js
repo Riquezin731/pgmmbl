@@ -1,4 +1,4 @@
-import * as THREE from 'https://unpkg.com/three@0.128.0/build/three.module.js';
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.js';
 
 export class Bot {
   constructor(scene, x, z) {
@@ -11,7 +11,7 @@ export class Bot {
   }
 
   update(delta) {
-    // Movimento simples: gira no próprio eixo
+    // Gira lentamente no lugar
     this.mesh.rotation.y += delta * 0.5;
   }
 }
