@@ -3,18 +3,21 @@ html, body {
   overflow: hidden;
   width: 100%;
   height: 100%;
-  background: #87ceeb; /* céu */
+  background: #87ceeb;
   font-family: sans-serif;
 }
 
 #instructions {
   position: absolute;
   top: 50%;
+  transform: translateY(-50%);
   width: 100%;
   text-align: center;
   color: #fff;
   font-size: 24px;
   user-select: none;
+  cursor: pointer;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
 }
 
 #damageContainer {
@@ -24,6 +27,8 @@ html, body {
   width: 100%;
   height: 100%;
   pointer-events: none;
+  overflow: visible;
+  z-index: 20;
 }
 
 .damageText {
@@ -31,14 +36,37 @@ html, body {
   color: #ff4444;
   font-weight: bold;
   user-select: none;
+  transform: translate(-50%, -50%);
   animation: riseFade 1s forwards;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
 }
 
 @keyframes riseFade {
-  0%   { opacity: 1; transform: translateY(0); }
-  100% { opacity: 0; transform: translateY(-30px); }
+  0%   { opacity: 1; transform: translate(-50%, -50%) translateY(0); }
+  100% { opacity: 0; transform: translate(-50%, -50%) translateY(-30px); }
 }
 
+/* Barra de vida dos bots */
+.botHealth {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 60px;
+  height: 8px;
+  background: rgba(0,0,0,0.6);
+  border-radius: 4px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 30;
+}
+.botHealthBar {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #00ff00, #88ff00);
+  border-radius: 4px;
+}
+
+/* Minimap */
 #minimap {
   position: absolute;
   bottom: 10px;
@@ -48,4 +76,5 @@ html, body {
   border: 2px solid #fff;
   background: #222;
   z-index: 10;
+  image-rendering: optimizeQuality;
 }
