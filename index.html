@@ -1,6 +1,63 @@
-<section id="sudoku" class="panel">
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jogos — Campo Minado & Sudoku</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
   <header class="header">
-    <h1>Sudoku</h1>
+    <h1>Jogos</h1>
+    <div class="controls" style="margin-top:10px">
+      <button class="btn tab-btn" data-tab="mines">Campo Minado</button>
+      <button class="btn tab-btn" data-tab="sudoku">Sudoku</button>
+    </div>
+  </header>
+
+  <!-- Painel Campo Minado -->
+  <section id="panel-mines" class="panel">
+    <div class="controls">
+      <div class="control-group">
+        <label for="difficulty">Dificuldade</label>
+        <select id="difficulty">
+          <option value="custom">Personalizado</option>
+          <option value="easy">Fácil (9x9, 10 minas)</option>
+          <option value="medium">Médio (16x16, 40 minas)</option>
+          <option value="hard">Difícil (30x16, 99 minas)</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label for="rows">Linhas</label>
+        <input id="rows" type="number" min="5" max="50" value="9">
+      </div>
+      <div class="control-group">
+        <label for="cols">Colunas</label>
+        <input id="cols" type="number" min="5" max="50" value="9">
+      </div>
+      <div class="control-group">
+        <label for="mines">Minas</label>
+        <input id="mines" type="number" min="5" max="500" value="10">
+      </div>
+      <button id="startBtn" class="btn">Iniciar / Reiniciar</button>
+    </div>
+
+    <div class="status">
+      <div class="status-item"><span class="label">Minas:</span><span id="mineCount">0</span></div>
+      <div class="status-item"><span class="label">Bandeiras:</span><span id="flagsCount">0</span></div>
+      <div class="status-item"><span class="label">Tempo:</span><span id="timer">00:00</span></div>
+      <div class="status-item"><span class="label">Estado:</span><span id="gameState">Pronto</span></div>
+    </div>
+
+    <div id="board" class="board" aria-label="Tabuleiro de Campo Minado"></div>
+    <footer class="footer">
+      <p>Clique esquerdo revela. Clique direito marca bandeira. Revele todas as células seguras para vencer.</p>
+    </footer>
+  </section>
+
+  <!-- Painel Sudoku -->
+  <section id="panel-sudoku" class="panel hidden">
+    <h2 class="sr-only">Sudoku</h2>
     <div class="controls">
       <div class="control-group">
         <label for="sudokuDifficulty">Dificuldade</label>
@@ -17,24 +74,16 @@
     </div>
 
     <div class="status">
-      <div class="status-item">
-        <span class="label">Tempo:</span>
-        <span id="sudokuTimer">00:00</span>
-      </div>
-      <div class="status-item">
-        <span class="label">Estado:</span>
-        <span id="sudokuState">Pronto</span>
-      </div>
+      <div class="status-item"><span class="label">Tempo:</span><span id="sudokuTimer">00:00</span></div>
+      <div class="status-item"><span class="label">Estado:</span><span id="sudokuState">Pronto</span></div>
     </div>
-  </header>
 
-  <main>
-    <div id="sudokuBoard" class="board">
-      <!-- A grade 9x9 será injetada via JS: <div class="sudoku-grid">...</div> -->
-    </div>
-  </main>
+    <div id="sudokuBoard" class="board" aria-label="Tabuleiro de Sudoku"></div>
+    <footer class="footer">
+      <p>Complete a grade 9x9. Cada linha, coluna e bloco 3x3 deve conter 1–9 sem repetição.</p>
+    </footer>
+  </section>
 
-  <footer class="footer">
-    <p>Complete a grade 9x9. Cada linha, coluna e bloco 3x3 deve conter 1–9 sem repetição.</p>
-  </footer>
-</section>
+  <script src="script.js" defer></script>
+</body>
+</html>
