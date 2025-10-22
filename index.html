@@ -1,56 +1,40 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Campo Minado</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
+<section id="sudoku" class="panel">
   <header class="header">
-    <h1>Campo Minado</h1>
+    <h1>Sudoku</h1>
     <div class="controls">
       <div class="control-group">
-        <label for="difficulty">Dificuldade</label>
-        <select id="difficulty">
-          <option value="custom">Personalizado</option>
-          <option value="easy">Fácil (9x9, 10 minas)</option>
-          <option value="medium">Médio (16x16, 40 minas)</option>
-          <option value="hard">Difícil (30x16, 99 minas)</option>
+        <label for="sudokuDifficulty">Dificuldade</label>
+        <select id="sudokuDifficulty">
+          <option value="easy">Fácil</option>
+          <option value="medium">Médio</option>
+          <option value="hard">Difícil</option>
         </select>
       </div>
-      <div class="control-group">
-        <label for="rows">Linhas</label>
-        <input id="rows" type="number" min="5" max="50" value="9">
-      </div>
-      <div class="control-group">
-        <label for="cols">Colunas</label>
-        <input id="cols" type="number" min="5" max="50" value="9">
-      </div>
-      <div class="control-group">
-        <label for="mines">Minas</label>
-        <input id="mines" type="number" min="5" max="500" value="10">
-      </div>
-      <button id="startBtn" class="btn">Iniciar / Reiniciar</button>
+      <button id="sudokuNew" class="btn">Novo jogo</button>
+      <button id="sudokuValidate" class="btn">Validar</button>
+      <button id="sudokuClearCell" class="btn">Apagar célula</button>
+      <button id="sudokuClearAll" class="btn">Apagar tudo</button>
     </div>
 
     <div class="status">
-      <div class="status-item"><span class="label">Minas:</span><span id="mineCount">0</span></div>
-      <div class="status-item"><span class="label">Bandeiras:</span><span id="flagsCount">0</span></div>
-      <div class="status-item"><span class="label">Tempo:</span><span id="timer">00:00</span></div>
-      <div class="status-item"><span class="label">Estado:</span><span id="gameState">Pronto</span></div>
+      <div class="status-item">
+        <span class="label">Tempo:</span>
+        <span id="sudokuTimer">00:00</span>
+      </div>
+      <div class="status-item">
+        <span class="label">Estado:</span>
+        <span id="sudokuState">Pronto</span>
+      </div>
     </div>
   </header>
 
   <main>
-    <div id="board" class="board" aria-label="Tabuleiro de Campo Minado"></div>
+    <div id="sudokuBoard" class="board">
+      <!-- A grade 9x9 será injetada via JS: <div class="sudoku-grid">...</div> -->
+    </div>
   </main>
 
   <footer class="footer">
-    <p>Clique esquerdo revela. Clique direito marca bandeira. Revele todas as células seguras para vencer.</p>
+    <p>Complete a grade 9x9. Cada linha, coluna e bloco 3x3 deve conter 1–9 sem repetição.</p>
   </footer>
-
-  <script src="script.js" defer></script>
-</body>
-</html>
+</section>
