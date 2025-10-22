@@ -1,121 +1,73 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Campo Minado</title>
-  <meta name="description" content="Jogo de Campo Minado com configuração de tamanho do tabuleiro e quantidade de minas." />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header class="app-header" role="banner">
+  <header class="header">
     <h1>Campo Minado</h1>
+    <div class="controls">
+      <div class="control-group">
+        <label for="difficulty">Dificuldade</label>
+        <select id="difficulty">
+          <option value="custom">Personalizado</option>
+          <option value="easy">Fácil (9x9, 10 minas)</option>
+          <option value="medium">Médio (16x16, 40 minas)</option>
+          <option value="hard">Difícil (30x16, 99 minas)</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label for="rows">Linhas</label>
+        <input id="rows" type="number" min="5" max="50" value="9" />
+      </div>
+
+      <div class="control-group">
+        <label for="cols">Colunas</label>
+        <input id="cols" type="number" min="5" max="50" value="9" />
+      </div>
+
+      <div class="control-group">
+        <label for="mines">Minas</label>
+        <input id="mines" type="number" min="5" max="500" value="10" />
+      </div>
+
+      <button id="startBtn" class="btn">Iniciar / Reiniciar</button>
+    </div>
+
+    <div class="status">
+      <div class="status-item">
+        <span class="label">Minas:</span>
+        <span id="mineCount">0</span>
+      </div>
+      <div class="status-item">
+        <span class="label">Bandeiras:</span>
+        <span id="flagsCount">0</span>
+      </div>
+      <div class="status-item">
+        <span class="label">Tempo:</span>
+        <span id="timer">00:00</span>
+      </div>
+      <div class="status-item">
+        <span class="label">Estado:</span>
+        <span id="gameState">Pronto</span>
+      </div>
+    </div>
   </header>
 
-  <main role="main">
-    <!-- Tela inicial (setup) -->
-    <section id="setup" class="card" aria-labelledby="setup-title">
-      <h2 id="setup-title">Configurações</h2>
-
-      <!-- Presets de dificuldade (opcional) -->
-      <div class="actions" aria-label="Presets de dificuldade">
-        <button type="button" class="btn" data-preset="easy" aria-label="Fácil">Fácil (9x9, 10)</button>
-        <button type="button" class="btn" data-preset="medium" aria-label="Médio">Médio (16x16, 40)</button>
-        <button type="button" class="btn" data-preset="hard" aria-label="Difícil">Difícil (16x30, 99)</button>
-      </div>
-
-      <form id="setup-form" novalidate>
-        <div class="form-row">
-          <label for="rows">Linhas</label>
-          <input type="number" id="rows" name="rows" min="5" max="40" value="10" required aria-required="true" />
-        </div>
-
-        <div class="form-row">
-          <label for="cols">Colunas</label>
-          <input type="number" id="cols" name="cols" min="5" max="40" value="10" required aria-required="true" />
-        </div>
-
-        <div class="form-row">
-          <label for="mines">Minas</label>
-          <input type="number" id="mines" name="mines" min="1" value="20" required aria-required="true" />
-        </div>
-
-        <div class="form-row">
-          <label for="seed">Semente (opcional)</label>
-          <input type="text" id="seed" name="seed" placeholder="Ex.: jogo-123" inputmode="text" />
-        </div>
-
-        <div class="actions">
-          <button type="submit" class="btn primary" aria-label="Iniciar jogo">Iniciar jogo</button>
-        </div>
-
-        <p class="hint" id="setup-hint">
-          Dica: clique com o botão direito para marcar bandeira. Teclas: F (bandeira), Enter/Espaço (revelar), D (acorde).
-        </p>
-      </form>
-    </section>
-
-    <!-- HUD do jogo -->
-    <section id="hud" class="hud hidden" aria-label="Indicadores do jogo">
-      <div class="hud-left">
-        <span class="hud-item">
-          Minas: <strong id="mine-count">0</strong>
-        </span>
-        <span class="hud-item">
-          Bandeiras: <strong id="flags-used">0</strong>
-        </span>
-        <span class="hud-item">
-          Reveladas: <strong id="revealed-count">0</strong>
-        </span>
-      </div>
-      <div class="hud-right">
-        <button id="reset-btn" class="btn" aria-label="Reiniciar partida">Reiniciar</button>
-        <button id="back-btn" class="btn" aria-label="Voltar para configurações">Voltar</button>
-      </div>
-    </section>
-
-    <!-- Tabuleiro -->
-    <section id="board-container" class="board-container hidden" aria-live="polite">
-      <div id="status" class="status" aria-atomic="true"></div>
-      <div
-        id="board"
-        class="board"
-        role="grid"
-        aria-label="Tabuleiro de Campo Minado"
-        aria-describedby="setup-hint"
-      ></div>
-    </section>
+  <main>
+    <div id="board" class="board" aria-label="Tabuleiro de Campo Minado"></div>
   </main>
 
-  <footer class="app-footer" role="contentinfo">
-    <small>Feito com ❤️ – Compatível com GitHub Pages</small>
+  <footer class="footer">
+    <p>
+      Clique esquerdo revela. Clique direito marca bandeira. Revelar todas as células seguras vence o jogo.
+    </p>
   </footer>
 
-  <script>
-    // Presets de dificuldade: aplica nos inputs
-    document.addEventListener('DOMContentLoaded', () => {
-      const presetButtons = document.querySelectorAll('[data-preset]');
-      const rowsEl = document.getElementById('rows');
-      const colsEl = document.getElementById('cols');
-      const minesEl = document.getElementById('mines');
-
-      const presets = {
-        easy: { rows: 9, cols: 9, mines: 10 },
-        medium: { rows: 16, cols: 16, mines: 40 },
-        hard: { rows: 16, cols: 30, mines: 99 }
-      };
-
-      presetButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-          const p = presets[btn.dataset.preset];
-          if (!p) return;
-          rowsEl.value = p.rows;
-          colsEl.value = p.cols;
-          minesEl.value = p.mines;
-        });
-      });
-    });
-  </script>
   <script src="script.js"></script>
 </body>
 </html>
