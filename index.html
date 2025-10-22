@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Campo Minado</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header class="header">
@@ -19,42 +20,26 @@
           <option value="hard">Difícil (30x16, 99 minas)</option>
         </select>
       </div>
-
       <div class="control-group">
         <label for="rows">Linhas</label>
-        <input id="rows" type="number" min="5" max="50" value="9" />
+        <input id="rows" type="number" min="5" max="50" value="9">
       </div>
-
       <div class="control-group">
         <label for="cols">Colunas</label>
-        <input id="cols" type="number" min="5" max="50" value="9" />
+        <input id="cols" type="number" min="5" max="50" value="9">
       </div>
-
       <div class="control-group">
         <label for="mines">Minas</label>
-        <input id="mines" type="number" min="5" max="500" value="10" />
+        <input id="mines" type="number" min="5" max="500" value="10">
       </div>
-
       <button id="startBtn" class="btn">Iniciar / Reiniciar</button>
     </div>
 
     <div class="status">
-      <div class="status-item">
-        <span class="label">Minas:</span>
-        <span id="mineCount">0</span>
-      </div>
-      <div class="status-item">
-        <span class="label">Bandeiras:</span>
-        <span id="flagsCount">0</span>
-      </div>
-      <div class="status-item">
-        <span class="label">Tempo:</span>
-        <span id="timer">00:00</span>
-      </div>
-      <div class="status-item">
-        <span class="label">Estado:</span>
-        <span id="gameState">Pronto</span>
-      </div>
+      <div class="status-item"><span class="label">Minas:</span><span id="mineCount">0</span></div>
+      <div class="status-item"><span class="label">Bandeiras:</span><span id="flagsCount">0</span></div>
+      <div class="status-item"><span class="label">Tempo:</span><span id="timer">00:00</span></div>
+      <div class="status-item"><span class="label">Estado:</span><span id="gameState">Pronto</span></div>
     </div>
   </header>
 
@@ -63,11 +48,9 @@
   </main>
 
   <footer class="footer">
-    <p>
-      Clique esquerdo revela. Clique direito marca bandeira. Revelar todas as células seguras vence o jogo.
-    </p>
+    <p>Clique esquerdo revela. Clique direito marca bandeira. Revele todas as células seguras para vencer.</p>
   </footer>
 
-  <script src="script.js"></script>
+  <script src="script.js" defer></script>
 </body>
 </html>
