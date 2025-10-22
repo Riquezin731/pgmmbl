@@ -1,4 +1,193 @@
-/* Sudoku: grade e células, seguindo o tema base */
+:root {
+  --bg: #0f1220;
+  --panel: #171a2b;
+  --accent: #6cf0c2;
+  --accent-2: #7aa9ff;
+  --text: #e7eaf6;
+  --muted: #a9afc6;
+  --danger: #ff6b6b;
+  --warning: #ffd66b;
+  --cell: #1f2338;
+  --cell-hover: #262b45;
+  --cell-open: #14172a;
+  --cell-border: #2b3050;
+  --grid-gap: 4px;
+  --radius: 10px;
+  --shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: radial-gradient(1000px 600px at 10% 10%, #131633 0%, var(--bg) 70%);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+}
+
+.header {
+  max-width: 1080px;
+  margin: 20px auto 0;
+  padding: 16px;
+}
+
+.header h1 {
+  margin: 0 0 12px 0;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  background: linear-gradient(180deg, #1b1f35 0%, var(--panel) 100%);
+  border: 1px solid #272b47;
+  border-radius: var(--radius);
+  padding: 12px;
+  box-shadow: var(--shadow);
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 140px;
+}
+
+label {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+select, input[type="number"] {
+  background: var(--cell);
+  color: var(--text);
+  border: 1px solid var(--cell-border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  outline: none;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+select:hover, input[type="number"]:hover {
+  background: var(--cell-hover);
+  border-color: #3b4270;
+}
+
+.btn {
+  align-self: end;
+  background: linear-gradient(180deg, var(--accent) 0%, #22cf98 100%);
+  color: #061b12;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 10px 18px rgba(108, 240, 194, 0.25);
+  transition: transform 80ms ease, box-shadow 160ms ease, filter 160ms ease;
+}
+
+.btn:hover { filter: brightness(1.05); }
+.btn:active { transform: translateY(1px); }
+
+.status {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-top: 14px;
+  background: linear-gradient(180deg, #191c31 0%, #14172a 100%);
+  border: 1px solid #242845;
+  border-radius: var(--radius);
+  padding: 10px 12px;
+}
+
+.status-item {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background: #121428;
+  border: 1px solid #222647;
+  border-radius: 8px;
+  padding: 6px 8px;
+}
+
+.status .label { color: var(--muted); }
+
+.board {
+  max-width: 1080px;
+  margin: 16px auto 40px;
+  background: linear-gradient(180deg, #1b1f35 0%, #171a2b 100%);
+  border: 1px solid #262a49;
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow: var(--shadow);
+}
+
+/* Campo Minado */
+.grid {
+  display: grid;
+  gap: var(--grid-gap);
+  justify-content: start;
+}
+
+.cell {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  background: var(--cell);
+  border: 1px solid var(--cell-border);
+  border-radius: 8px;
+  color: var(--text);
+  cursor: pointer;
+  user-select: none;
+  transition: background 120ms ease, transform 80ms ease, box-shadow 120ms ease;
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.cell:hover { background: var(--cell-hover); }
+.cell:active { transform: translateY(1px); }
+
+.cell.open {
+  background: var(--cell-open);
+  border-color: #1d2140;
+  box-shadow: none;
+}
+
+.cell.mine.open {
+  background: linear-gradient(180deg, #831a2a 0%, #5b0f1b 100%);
+  border-color: #99263a;
+}
+
+.cell.flag::after {
+  content: "\2691";
+  color: var(--warning);
+  font-weight: 700;
+  font-size: 18px;
+  transform: translateY(-1px);
+}
+
+.number-1 { color: #7aa9ff; }
+.number-2 { color: #6cf0c2; }
+.number-3 { color: #ffd66b; }
+.number-4 { color: #ff6b6b; }
+.number-5 { color: #e89cff; }
+.number-6 { color: #8fe7ff; }
+.number-7 { color: #c9f55a; }
+.number-8 { color: #f3f3f3; }
+
+.footer {
+  max-width: 1080px;
+  margin: 0 auto 40px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.panel.hidden { display: none; }
+
+/* Sudoku (usa o mesmo tema) */
 .sudoku-grid {
   display: grid;
   grid-template-columns: repeat(9, 40px);
@@ -28,75 +217,34 @@
   transition: background 120ms ease, transform 80ms ease, box-shadow 120ms ease, color 120ms ease;
   box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
 }
-
-.s-cell:hover {
-  background: var(--cell-hover);
-}
-
-.s-cell:active {
-  transform: translateY(1px);
-}
-
-/* Células fixas (pistas) */
+.s-cell:hover { background: var(--cell-hover); }
+.s-cell:active { transform: translateY(1px); }
 .s-cell.fixed {
   background: #1c2139;
   color: #bfc7e6;
   cursor: default;
   box-shadow: none;
 }
-
-/* Seleção e destaques */
-.s-cell.selected {
-  outline: 2px solid var(--accent-2);
-  outline-offset: -2px;
-}
-
-.s-cell.highlight {
-  background: #202548;
-}
-
-/* Erros e conflitos */
+.s-cell.selected { outline: 2px solid var(--accent-2); outline-offset: -2px; }
+.s-cell.highlight { background: #202548; }
 .s-cell.error {
   background: linear-gradient(180deg, #831a2a 0%, #5b0f1b 100%);
-  border-color: #99263a;
-  color: #fff;
+  border-color: #99263a; color: #fff;
+}
+/* Bordas grossas 3x3 */
+.sudoku-grid .s-cell:nth-child(3n + 1) { border-left-color: #3a4168; border-left-width: 2px; }
+.sudoku-grid .s-cell:nth-child(3n) { border-right-color: #3a4168; border-right-width: 2px; }
+.s-row-top { border-top-color: #3a4168 !important; border-top-width: 2px !important; }
+.s-row-bottom { border-bottom-color: #3a4168 !important; border-bottom-width: 2px !important; }
+
+/* Acessibilidade oculta */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0,0,0,0); border: 0;
 }
 
-/* Bordas grossas dos blocos 3x3 (estilo Sudoku) */
-.sudoku-grid .s-cell {
-  position: relative;
-}
-.sudoku-grid .s-cell:nth-child(3n + 1) {
-  border-left-color: #3a4168;
-  border-left-width: 2px;
-}
-.sudoku-grid .s-cell:nth-child(3n) {
-  border-right-color: #3a4168;
-  border-right-width: 2px;
-}
-/* Linhas superiores e inferiores grossas a cada 3 linhas */
-.sudoku-grid .s-cell {
-  /* Usaremos classes utilitárias via JS para as linhas 1, 4, 7 (top) e 3, 6, 9 (bottom) */
-}
-.s-row-top {
-  border-top-color: #3a4168 !important;
-  border-top-width: 2px !important;
-}
-.s-row-bottom {
-  border-bottom-color: #3a4168 !important;
-  border-bottom-width: 2px !important;
-}
-
-/* Responsivo */
 @media (max-width: 640px) {
-  .sudoku-grid {
-    grid-template-columns: repeat(9, 32px);
-    grid-template-rows: repeat(9, 32px);
-    border-radius: 10px;
-  }
-  .s-cell {
-    width: 32px;
-    height: 32px;
-    font-size: 16px;
-  }
+  .cell { width: 32px; height: 32px; }
+  .sudoku-grid { grid-template-columns: repeat(9, 32px); grid-template-rows: repeat(9, 32px); }
+  .s-cell { width: 32px; height: 32px; font-size: 16px; }
 }
