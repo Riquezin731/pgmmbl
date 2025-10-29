@@ -10,14 +10,13 @@ document.addEventListener("DOMContentLoaded", () => {
     tabBtns.forEach(b => b.setAttribute("aria-pressed", b.dataset.tab === name ? "true" : "false"));
   };
   tabBtns.forEach(btn => btn.addEventListener("click", () => showPanel(btn.dataset.tab)));
-  showPanel("mines"); // padrão: Campo Minado
+  showPanel("mines"); // padrão
 
-  initMinesweeper(); // Mantido exatamente como enviado
-  initSudoku();      // Aperfeiçoado para números 1–9 com geração válida
+  initMinesweeper();
+  initSudoku();
 });
 
-/* ===================== Campo Minado ===================== */
-/* Mantido exatamente como nos seus códigos enviados */
+/* ===================== Campo Minado (centralizado e responsivo) ===================== */
 
 function initMinesweeper() {
   const boardEl = document.getElementById("board");
@@ -40,6 +39,11 @@ function initMinesweeper() {
 
   const idx = (r, c) => r * cols + c;
   const inBounds = (r, c) => r >= 0 && r < rows && c >= 0 && c < cols;
+
+  // Define colunas na root para CSS responsivo
+  function setColsVar() {
+    document.documentElement.style.setProperty("--cols", String(cols));
+  }
 
   function resetTimer() {
     if (timerInterval) clearInterval(timerInterval);
@@ -92,7 +96,7 @@ function initMinesweeper() {
     }));
     const gridEl = document.createElement("div");
     gridEl.className = "grid";
-    gridEl.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+    gridEl.style.gridTemplateColumns = `repeat(${cols}, auto)`;
 
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
@@ -110,6 +114,7 @@ function initMinesweeper() {
     }
     boardEl.innerHTML = "";
     boardEl.appendChild(gridEl);
+    setColsVar(); // atualiza --cols para ajuste automático de tamanho
   }
 
   function handleLeftClick(e) {
@@ -213,10 +218,13 @@ function initMinesweeper() {
   difficultyEl.addEventListener("change", () => { if (difficultyEl.value !== "custom") readInputsFromUI(); });
   boardEl.addEventListener("contextmenu", e => e.preventDefault());
   resetGame();
+
+  // Atualiza --cols quando inputs mudam (para manter responsividade)
+  rowsEl.addEventListener("input", () => setTimeout(setColsVar, 0));
+  colsEl.addEventListener("input", () => setTimeout(setColsVar, 0));
 }
 
-/* ===================== Sudoku ===================== */
-/* Aperfeiçoado: usa números 1–9, valida conflitos e gera puzzles válidos */
+/* ===================== Sudoku (dificuldades reais e centralizado) ===================== */
 
 function initSudoku() {
   const boardEl = document.getElementById("sudokuBoard");
@@ -228,12 +236,11 @@ function initSudoku() {
   const timerEl = document.getElementById("sudokuTimer");
   const stateEl = document.getElementById("sudokuState");
 
-  let grid = Array(81).fill(0);   // números do jogador
-  let fixed = Array(81).fill(false); // posições dadas (fixas)
+  let grid = Array(81).fill(0);
+  let fixed = Array(81).fill(false);
   let selected = -1;
   let startTime = null, timerInterval = null;
 
-  // Timer
   function startTimer() {
     stopTimer();
     startTime = Date.now();
@@ -249,7 +256,7 @@ function initSudoku() {
     timerInterval = null;
   }
 
-  // Renderização
+  // Render centralizado
   function render() {
     const gridEl = document.createElement("div");
     gridEl.className = "sudoku-grid";
@@ -299,14 +306,12 @@ function initSudoku() {
     }
   }
 
-  // Entrada por teclado
   function handleKey(e) {
     if (selected < 0) return;
     const i = selected;
     if (fixed[i]) return;
     if (e.key >= "1" && e.key <= "9") {
-      const val = parseInt(e.key, 10);
-      grid[i] = val;
+      grid[i] = parseInt(e.key, 10);
       render();
     } else if (e.key === "Backspace" || e.key === "Delete" || e.key === "0") {
       grid[i] = 0;
@@ -323,7 +328,6 @@ function initSudoku() {
     render();
   }
 
-  // Validação
   function isValidPlacement(idx, val, arr = grid) {
     const r = Math.floor(idx / 9), c = idx % 9;
     for (let i = 0; i < 9; i++) {
@@ -353,8 +357,7 @@ function initSudoku() {
     stateEl.textContent = ok ? "Sem conflitos" : "Conflitos encontrados";
   }
 
-  // ---------- Geração de tabuleiro válido com solução única ----------
-  // Utilitários
+  // ---------- Gerador com solução única e dificuldades reais ----------
   const digits = [1,2,3,4,5,6,7,8,9];
 
   function shuffle(arr) {
@@ -383,7 +386,6 @@ function initSudoku() {
     return true;
   }
 
-  // Resolve com backtracking (retorna boolean)
   function solve(arr) {
     const idx = findEmpty(arr);
     if (idx === -1) return true;
@@ -398,15 +400,13 @@ function initSudoku() {
     return false;
   }
 
-  // Conta soluções (limita a 2 para checar unicidade)
   function countSolutions(arr, limit = 2) {
     let count = 0;
     function dfs(a) {
       if (count >= limit) return;
       const idx = findEmpty(a);
       if (idx === -1) { count++; return; }
-      const order = digits; // ordem fixa para rapidez
-      for (const d of order) {
+      for (const d of digits) {
         if (canPlace(a, idx, d)) {
           a[idx] = d;
           dfs(a);
@@ -419,10 +419,9 @@ function initSudoku() {
     return count;
   }
 
-  // Gera uma grade completa válida
   function generateSolvedBoard() {
     const a = Array(81).fill(0);
-    // Preenche diagonal de blocos 3x3 para acelerar
+    // Preenche blocos diagonais para acelerar
     for (let b = 0; b < 3; b++) {
       const base = b * 27 + b * 3;
       const nums = shuffle(digits.slice());
@@ -435,38 +434,32 @@ function initSudoku() {
     return a;
   }
 
-  // Remove valores para formar puzzle com solução única conforme dificuldade
-  function generatePuzzle(difficulty) {
+  function difficultyConfig(level) {
+    // pistas visíveis (clues)
+    if (level === "easy") return { removals: 81 - 42 };   // 42 pistas
+    if (level === "medium") return { removals: 81 - 33 }; // 33 pistas
+    return { removals: 81 - 25 };                         // 25 pistas (difícil)
+  }
+
+  function generatePuzzle(level) {
+    const { removals } = difficultyConfig(level);
     const solved = generateSolvedBoard();
     let puzzle = solved.slice();
 
-    const removalsTarget = difficulty === "easy" ? 40 : difficulty === "medium" ? 50 : 56; // números removidos
     const positions = shuffle([...Array(81)].map((_, i) => i));
     let removed = 0;
 
     for (const pos of positions) {
-      if (removed >= removalsTarget) break;
+      if (removed >= removals) break;
       const backup = puzzle[pos];
       puzzle[pos] = 0;
 
-      // Checa unicidade (máx 1 solução)
+      // Garante solução única
       const solutions = countSolutions(puzzle.slice(), 2);
       if (solutions !== 1) {
-        puzzle[pos] = backup; // reverte se perder unicidade
+        puzzle[pos] = backup;
       } else {
         removed++;
-      }
-    }
-
-    // Garantia de ter pelo menos X pistas (clues)
-    const minClues = 81 - removalsTarget;
-    const clues = puzzle.filter(v => v !== 0).length;
-    if (clues < minClues) {
-      // Se por alguma razão ficarem menos que o mínimo, repõe alguns
-      const empties = puzzle.map((v, i) => v === 0 ? i : -1).filter(i => i >= 0);
-      for (let i = 0; i < (minClues - clues) && i < empties.length; i++) {
-        const p = empties[i];
-        puzzle[p] = solved[p];
       }
     }
 
@@ -475,7 +468,6 @@ function initSudoku() {
 
   function newGame() {
     stateEl.textContent = "Gerando...";
-    // Geração
     const { puzzle } = generatePuzzle(diffEl.value);
     grid = puzzle.slice();
     fixed = grid.map(v => v !== 0);
@@ -484,13 +476,11 @@ function initSudoku() {
     startTimer();
   }
 
-  // Eventos
   document.addEventListener("keydown", handleKey);
   btnNew.addEventListener("click", newGame);
   btnValidate.addEventListener("click", validateBoard);
   btnClearCell.addEventListener("click", clearCell);
   btnClearAll.addEventListener("click", clearAll);
 
-  // Inicialização
   newGame();
 }
