@@ -12,11 +12,12 @@ document.addEventListener("DOMContentLoaded", () => {
   tabBtns.forEach(btn => btn.addEventListener("click", () => showPanel(btn.dataset.tab)));
   showPanel("mines"); // padrão: Campo Minado
 
-  initMinesweeper();
-  initSudoku();
+  initMinesweeper(); // Mantido exatamente como enviado
+  initSudoku();      // Aperfeiçoado para números 1–9 com geração válida
 });
 
 /* ===================== Campo Minado ===================== */
+/* Mantido exatamente como nos seus códigos enviados */
 
 function initMinesweeper() {
   const boardEl = document.getElementById("board");
@@ -215,6 +216,7 @@ function initMinesweeper() {
 }
 
 /* ===================== Sudoku ===================== */
+/* Aperfeiçoado: usa números 1–9, valida conflitos e gera puzzles válidos */
 
 function initSudoku() {
   const boardEl = document.getElementById("sudokuBoard");
@@ -226,11 +228,12 @@ function initSudoku() {
   const timerEl = document.getElementById("sudokuTimer");
   const stateEl = document.getElementById("sudokuState");
 
-  let grid = Array(81).fill(0);
-  let fixed = Array(81).fill(false);
+  let grid = Array(81).fill(0);   // números do jogador
+  let fixed = Array(81).fill(false); // posições dadas (fixas)
   let selected = -1;
   let startTime = null, timerInterval = null;
 
+  // Timer
   function startTimer() {
     stopTimer();
     startTime = Date.now();
@@ -246,6 +249,7 @@ function initSudoku() {
     timerInterval = null;
   }
 
+  // Renderização
   function render() {
     const gridEl = document.createElement("div");
     gridEl.className = "sudoku-grid";
@@ -259,6 +263,7 @@ function initSudoku() {
         if ((r + 1) % 3 === 0) cell.classList.add("s-row-bottom");
         cell.textContent = grid[i] ? grid[i] : "";
         cell.setAttribute("data-idx", i);
+        cell.tabIndex = 0;
         cell.addEventListener("click", () => selectCell(i));
         gridEl.appendChild(cell);
       }
@@ -294,12 +299,14 @@ function initSudoku() {
     }
   }
 
+  // Entrada por teclado
   function handleKey(e) {
     if (selected < 0) return;
     const i = selected;
     if (fixed[i]) return;
     if (e.key >= "1" && e.key <= "9") {
-      grid[i] = parseInt(e.key, 10);
+      const val = parseInt(e.key, 10);
+      grid[i] = val;
       render();
     } else if (e.key === "Backspace" || e.key === "Delete" || e.key === "0") {
       grid[i] = 0;
@@ -316,16 +323,17 @@ function initSudoku() {
     render();
   }
 
-  function isValidPlacement(idx, val) {
+  // Validação
+  function isValidPlacement(idx, val, arr = grid) {
     const r = Math.floor(idx / 9), c = idx % 9;
     for (let i = 0; i < 9; i++) {
-      if (grid[r * 9 + i] === val && i !== c) return false;
-      if (grid[i * 9 + c] === val && i !== r) return false;
+      if (arr[r * 9 + i] === val && i !== c) return false;
+      if (arr[i * 9 + c] === val && i !== r) return false;
     }
     const br = Math.floor(r / 3) * 3, bc = Math.floor(c / 3) * 3;
     for (let rr = br; rr < br + 3; rr++) for (let cc = bc; cc < bc + 3; cc++) {
       const ii = rr * 9 + cc;
-      if (grid[ii] === val && ii !== idx) return false;
+      if (arr[ii] === val && ii !== idx) return false;
     }
     return true;
   }
@@ -333,6 +341,7 @@ function initSudoku() {
   function validateBoard() {
     const cells = boardEl.querySelectorAll(".s-cell");
     let ok = true;
+    cells.forEach(c => c.classList.remove("error"));
     for (let i = 0; i < 81; i++) {
       const v = grid[i];
       if (v === 0) continue;
@@ -344,24 +353,130 @@ function initSudoku() {
     stateEl.textContent = ok ? "Sem conflitos" : "Conflitos encontrados";
   }
 
-  // Gerador simples para demo (substitua por gerador com solução única se quiser)
-  function generatePuzzle(difficulty) {
-    const clues = difficulty === "easy" ? 36 : difficulty === "medium" ? 30 : 24;
-    const puzzle = Array(81).fill(0);
-    let placed = 0;
-    while (placed < clues) {
-      const i = Math.floor(Math.random() * 81);
-      const val = Math.floor(Math.random() * 9) + 1;
-      if (puzzle[i] === 0) {
-        puzzle[i] = val;
-        placed++;
+  // ---------- Geração de tabuleiro válido com solução única ----------
+  // Utilitários
+  const digits = [1,2,3,4,5,6,7,8,9];
+
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function findEmpty(arr) {
+    for (let i = 0; i < 81; i++) if (arr[i] === 0) return i;
+    return -1;
+  }
+
+  function canPlace(arr, idx, val) {
+    const r = Math.floor(idx / 9), c = idx % 9;
+    for (let i = 0; i < 9; i++) {
+      if (arr[r * 9 + i] === val) return false;
+      if (arr[i * 9 + c] === val) return false;
+    }
+    const br = Math.floor(r / 3) * 3, bc = Math.floor(c / 3) * 3;
+    for (let rr = br; rr < br + 3; rr++) for (let cc = bc; cc < bc + 3; cc++) {
+      if (arr[rr * 9 + cc] === val) return false;
+    }
+    return true;
+  }
+
+  // Resolve com backtracking (retorna boolean)
+  function solve(arr) {
+    const idx = findEmpty(arr);
+    if (idx === -1) return true;
+    const order = shuffle(digits.slice());
+    for (const d of order) {
+      if (canPlace(arr, idx, d)) {
+        arr[idx] = d;
+        if (solve(arr)) return true;
+        arr[idx] = 0;
       }
     }
-    return puzzle;
+    return false;
+  }
+
+  // Conta soluções (limita a 2 para checar unicidade)
+  function countSolutions(arr, limit = 2) {
+    let count = 0;
+    function dfs(a) {
+      if (count >= limit) return;
+      const idx = findEmpty(a);
+      if (idx === -1) { count++; return; }
+      const order = digits; // ordem fixa para rapidez
+      for (const d of order) {
+        if (canPlace(a, idx, d)) {
+          a[idx] = d;
+          dfs(a);
+          a[idx] = 0;
+          if (count >= limit) return;
+        }
+      }
+    }
+    dfs(arr.slice());
+    return count;
+  }
+
+  // Gera uma grade completa válida
+  function generateSolvedBoard() {
+    const a = Array(81).fill(0);
+    // Preenche diagonal de blocos 3x3 para acelerar
+    for (let b = 0; b < 3; b++) {
+      const base = b * 27 + b * 3;
+      const nums = shuffle(digits.slice());
+      let k = 0;
+      for (let rr = 0; rr < 3; rr++) for (let cc = 0; cc < 3; cc++) {
+        a[base + rr * 9 + cc] = nums[k++];
+      }
+    }
+    solve(a);
+    return a;
+  }
+
+  // Remove valores para formar puzzle com solução única conforme dificuldade
+  function generatePuzzle(difficulty) {
+    const solved = generateSolvedBoard();
+    let puzzle = solved.slice();
+
+    const removalsTarget = difficulty === "easy" ? 40 : difficulty === "medium" ? 50 : 56; // números removidos
+    const positions = shuffle([...Array(81)].map((_, i) => i));
+    let removed = 0;
+
+    for (const pos of positions) {
+      if (removed >= removalsTarget) break;
+      const backup = puzzle[pos];
+      puzzle[pos] = 0;
+
+      // Checa unicidade (máx 1 solução)
+      const solutions = countSolutions(puzzle.slice(), 2);
+      if (solutions !== 1) {
+        puzzle[pos] = backup; // reverte se perder unicidade
+      } else {
+        removed++;
+      }
+    }
+
+    // Garantia de ter pelo menos X pistas (clues)
+    const minClues = 81 - removalsTarget;
+    const clues = puzzle.filter(v => v !== 0).length;
+    if (clues < minClues) {
+      // Se por alguma razão ficarem menos que o mínimo, repõe alguns
+      const empties = puzzle.map((v, i) => v === 0 ? i : -1).filter(i => i >= 0);
+      for (let i = 0; i < (minClues - clues) && i < empties.length; i++) {
+        const p = empties[i];
+        puzzle[p] = solved[p];
+      }
+    }
+
+    return { puzzle, solved };
   }
 
   function newGame() {
-    const puzzle = generatePuzzle(diffEl.value);
+    stateEl.textContent = "Gerando...";
+    // Geração
+    const { puzzle } = generatePuzzle(diffEl.value);
     grid = puzzle.slice();
     fixed = grid.map(v => v !== 0);
     stateEl.textContent = "Pronto";
@@ -369,11 +484,13 @@ function initSudoku() {
     startTimer();
   }
 
+  // Eventos
   document.addEventListener("keydown", handleKey);
   btnNew.addEventListener("click", newGame);
   btnValidate.addEventListener("click", validateBoard);
   btnClearCell.addEventListener("click", clearCell);
   btnClearAll.addEventListener("click", clearAll);
 
+  // Inicialização
   newGame();
 }
