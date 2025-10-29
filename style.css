@@ -26,6 +26,13 @@ html, body {
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
 }
 
+/* Centralização dos painéis */
+.panel {
+  max-width: 1080px;
+  margin: 20px auto;
+  padding: 0 16px;
+}
+
 .header {
   max-width: 1080px;
   margin: 20px auto 0;
@@ -41,6 +48,7 @@ html, body {
 .controls {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 12px;
   background: linear-gradient(180deg, #1b1f35 0%, var(--panel) 100%);
   border: 1px solid #272b47;
@@ -92,8 +100,11 @@ select:hover, input[type="number"]:hover {
 .btn:hover { filter: brightness(1.05); }
 .btn:active { transform: translateY(1px); }
 
+/* Status centralizado e sem sobreposição */
 .status {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 16px;
   align-items: center;
   margin-top: 14px;
@@ -115,6 +126,7 @@ select:hover, input[type="number"]:hover {
 
 .status .label { color: var(--muted); }
 
+/* Board centralizado */
 .board {
   max-width: 1080px;
   margin: 16px auto 40px;
@@ -125,11 +137,17 @@ select:hover, input[type="number"]:hover {
   box-shadow: var(--shadow);
 }
 
-/* Campo Minado */
+/* Campo Minado centralizado e responsivo */
 .grid {
   display: grid;
   gap: var(--grid-gap);
-  justify-content: start;
+  justify-content: center;
+}
+
+.board .grid {
+  margin: 0 auto;
+  max-width: 100%;
+  overflow: auto;
 }
 
 .cell {
@@ -145,6 +163,12 @@ select:hover, input[type="number"]:hover {
   user-select: none;
   transition: background 120ms ease, transform 80ms ease, box-shadow 120ms ease;
   box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Ajuste automático de tamanho para grades grandes */
+.cell {
+  width: min(36px, calc(92vw / var(--cols, 9)));
+  height: min(36px, calc(92vw / var(--cols, 9)));
 }
 
 .cell:hover { background: var(--cell-hover); }
@@ -187,7 +211,7 @@ select:hover, input[type="number"]:hover {
 
 .panel.hidden { display: none; }
 
-/* Sudoku (usa o mesmo tema) */
+/* Sudoku (centralizado e tema consistente) */
 .sudoku-grid {
   display: grid;
   grid-template-columns: repeat(9, 40px);
@@ -244,7 +268,8 @@ select:hover, input[type="number"]:hover {
 }
 
 @media (max-width: 640px) {
-  .cell { width: 32px; height: 32px; }
+  .controls { justify-content: center; }
+  .cell { width: min(32px, calc(92vw / var(--cols, 9))); height: min(32px, calc(92vw / var(--cols, 9))); }
   .sudoku-grid { grid-template-columns: repeat(9, 32px); grid-template-rows: repeat(9, 32px); }
   .s-cell { width: 32px; height: 32px; font-size: 16px; }
 }
